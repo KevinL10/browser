@@ -2,10 +2,19 @@ import socket
 import ssl
 
 
-def request(url):
+# Returns: scheme, host, port, data (could be a path or raw HTML depending on scheme)
+def parse_url(url):
+    # Handle data and File URLs separatly
+    if url.startswith("data:text/html"):
+        scheme, data = url.split(",", 1)
+        return "data", None, None, data
+    elif url.startswith("file://"):
+        return "file", None, None, url[len("file://") :]
+
     scheme, url = url.split("://", 1)
     assert scheme in ["http", "https"], f"Unknown scheme {scheme}"
 
+    # Handle no trailing slash
     if "/" in url:
         host, path = url.split("/", 1)
         path = "/" + path
@@ -13,11 +22,25 @@ def request(url):
         host = url
         path = "/"
 
+    port = 80 if scheme == "http" else 443
+
     if ":" in host:
         host, port = host.split(":", 1)
         port = int(port)
 
-    port = 80 if scheme == "http" else 443
+    return scheme, host, port, path
+
+
+# Returns data pointed to by url
+def request(url):
+    scheme, host, port, path = parse_url(url)
+
+    if scheme == "file":
+        with open(path, "r") as f:
+            body = f.read()
+        return None, body
+    elif scheme == "data":
+        return None, path
 
     s = socket.socket(
         family=socket.AF_INET,
@@ -30,7 +53,6 @@ def request(url):
     if scheme == "https":
         ctx = ssl.create_default_context()
         s = ctx.wrap_socket(s, server_hostname=host)
-
     s.send(
         f"GET {path} HTTP/1.1\r\n".encode("utf8")
         + f"Host: {host}\r\n".encode("utf8")
