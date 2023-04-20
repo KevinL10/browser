@@ -56,8 +56,8 @@ def request(url):
     s.send(
         f"GET {path} HTTP/1.1\r\n".encode("utf8")
         + f"Host: {host}\r\n".encode("utf8")
-        + f"Connection: close\r\n".encode("utf8")
-        + f"User-Agent: browser\r\n\r\n".encode("utf8")
+        + "Connection: close\r\n".encode("utf8")
+        + "User-Agent: browser\r\n\r\n".encode("utf8")
     )
 
     response = s.makefile("r", encoding="utf8", newline="\n")
