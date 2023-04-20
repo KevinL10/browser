@@ -1,10 +1,10 @@
 import socket
 import ssl
 
+
 def request(url):
     scheme, url = url.split("://", 1)
     assert scheme in ["http", "https"], f"Unknown scheme {scheme}"
-
 
     if "/" in url:
         host, path = url.split("/", 1)
@@ -31,10 +31,11 @@ def request(url):
         ctx = ssl.create_default_context()
         s = ctx.wrap_socket(s, server_hostname=host)
 
-
     s.send(
-        f"GET {path} HTTP/1.0\r\n".encode("utf8")
-        + f"Host: {host}\r\n\r\n".encode("utf8")
+        f"GET {path} HTTP/1.1\r\n".encode("utf8")
+        + f"Host: {host}\r\n".encode("utf8")
+        + f"Connection: close\r\n".encode("utf8")
+        + f"User-Agent: browser\r\n\r\n".encode("utf8")
     )
 
     response = s.makefile("r", encoding="utf8", newline="\n")
@@ -57,7 +58,7 @@ def request(url):
 
     body = response.read()
     s.close()
-    
+
     return headers, body
 
 
@@ -78,5 +79,9 @@ def load(url):
 
 
 if __name__ == "__main__":
-    import sys 
-    load(sys.argv[1])    
+    import sys
+
+    if len(sys.argv) == 2:
+        load(sys.argv[1])
+    else:
+        load("https://example.org")
