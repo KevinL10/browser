@@ -7,3 +7,15 @@ A web browser implemented from scratch in Python.
 
 
 Adapted from [browser.engineering](https://browser.engineering/).
+
+
+
+### Supported features:
+
+ch. 1
+- `HTTP/1.1`
+- File URI scheme
+- data scheme
+- view-source scheme
+
+
