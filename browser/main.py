@@ -84,15 +84,32 @@ def request(url):
     return headers, body
 
 
+# Prints and returns all text between <body> and </body>, replacing entities with their corresponding symbols
 def show(body):
     in_angle = False
+    in_body = False
+    current_tag = ""
+    content = ""
+
     for c in body:
         if c == "<":
             in_angle = True
+            current_tag = ""
         elif c == ">":
             in_angle = False
-        elif not in_angle:
-            print(c, end="")
+        elif in_angle:
+            current_tag += c
+            if current_tag == "body":
+                in_body = True
+            elif current_tag == "/body":
+                in_body = False
+        elif in_body:
+            content += c
+
+    content = content.replace("&lt;", "<")
+    content = content.replace("&gt;", ">")
+    print(content)
+    return content
 
 
 def load(url):

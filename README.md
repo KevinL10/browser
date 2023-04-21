@@ -19,3 +19,8 @@ ch. 1
 - view-source scheme
 
 
+### Todo:
+- Custom testing infrastructure (serving test websites with specific headers / content)
+- Support gzip compression
+- Handle redirects
+- HTTP response caching
