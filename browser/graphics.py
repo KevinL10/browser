@@ -15,8 +15,17 @@ class Browser:
         self.canvas.pack()
         self.scroll = 0
 
+        self.window.bind("<Up>", self.scrollup)
         self.window.bind("<Down>", self.scrolldown)
 
+        # Linux mouse wheel bindings
+        self.window.bind("<Button-4>", self.scrollup)
+        self.window.bind("<Button-5>", self.scrolldown)
+
+
+    def scrollup(self, e):
+        self.scroll = max(0, self.scroll - SCROLL_STEP)
+        self.draw()
 
     def scrolldown(self, e):
         self.scroll += SCROLL_STEP
@@ -59,7 +68,7 @@ class Browser:
         
 
 
-Browser().load('https://example.org')
+Browser().load('https://browser.engineering/examples/xiyouji.html')
 tkinter.mainloop()
 
 

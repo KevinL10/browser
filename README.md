@@ -27,11 +27,10 @@ ch. 1
 
 
 ch.2 
-
+- Scrolling (mouse wheel & up/down keys)
 
 ### Todo:
 - Line breaks ('\n') with paragraph breaks
-- Mouse wheel scrolling
 - Emoji support
 - Allow browser resizing
 - Zoom for font size
