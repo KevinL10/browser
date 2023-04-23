@@ -1,3 +1,4 @@
+from .constants import ENTITIES
 import socket
 import ssl
 
@@ -10,6 +11,8 @@ def parse_url(url):
         return "data", None, None, data
     elif url.startswith("file://"):
         return "file", None, None, url[len("file://") :]
+    elif url.startswith("view-source:"):
+        url = url[len("view-source:"):]
 
     scheme, url = url.split("://", 1)
     assert scheme in ["http", "https"], f"Unknown scheme {scheme}"
@@ -31,7 +34,7 @@ def parse_url(url):
     return scheme, host, port, path
 
 
-# Returns data pointed to by url
+# Returns raw data pointed to by url
 def request(url):
     scheme, host, port, path = parse_url(url)
 
@@ -81,10 +84,17 @@ def request(url):
     body = response.read()
     s.close()
 
+    # For view-source schemes, we show the raw HTML output 
+    # by replacing reserved characters with entities
+    if url.startswith("view-source:"):
+        for reserved, entity in ENTITIES.items():
+            body = body.replace(reserved, entity)
+
     return headers, body
 
 
-# Prints and returns all text between <body> and </body>, replacing entities with their corresponding symbols
+# Prints all text between <body> and </body>,
+# replacing entities with their corresponding symbols
 def show(body):
     in_angle = False
     in_body = False
@@ -106,12 +116,13 @@ def show(body):
         elif in_body:
             content += c
 
-    content = content.replace("&lt;", "<")
-    content = content.replace("&gt;", ">")
+    for reserved, entity in ENTITIES.items():
+        content = content.replace(entity, reserved)
+    
     print(content)
-    return content
 
 
+# Requests the given resource; displays and returns the content
 def load(url):
     headers, body = request(url)
     show(body)
