@@ -24,3 +24,15 @@ ch. 1
 - Support gzip compression
 - Handle redirects
 - HTTP response caching
+
+
+ch.2 
+
+
+### Todo:
+- Line breaks ('\n') with paragraph breaks
+- Mouse wheel scrolling
+- Emoji support
+- Allow browser resizing
+- Zoom for font size
+
