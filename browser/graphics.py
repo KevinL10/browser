@@ -1,17 +1,13 @@
 from browser.util import lex
 from browser.request import request
-from browser.constants import HSTEP, VSTEP, HEIGHT, WIDTH, SCROLL_STEP
+from browser.constants import HSTEP, VSTEP, PSTEP, HEIGHT, WIDTH, SCROLL_STEP
 import tkinter
 
 
 class Browser:
     def __init__(self):
         self.window = tkinter.Tk()
-        self.canvas = tkinter.Canvas(
-            self.window, 
-            width=WIDTH,
-            height=HEIGHT
-        )
+        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT)
         self.canvas.pack()
         self.scroll = 0
 
@@ -21,7 +17,6 @@ class Browser:
         # Linux mouse wheel bindings
         self.window.bind("<Button-4>", self.scrollup)
         self.window.bind("<Button-5>", self.scrolldown)
-
 
     def scrollup(self, e):
         self.scroll = max(0, self.scroll - SCROLL_STEP)
@@ -37,6 +32,10 @@ class Browser:
         display_list = []
         cursor_x, cursor_y = HSTEP, VSTEP
         for c in text:
+            if c == '\n':
+                cursor_x = HSTEP
+                cursor_y += VSTEP + PSTEP
+
             display_list.append((cursor_x, cursor_y, c))
             cursor_x += HSTEP
 
@@ -61,14 +60,10 @@ class Browser:
     def load(self, url):
         headers, body = request(url)
         text = lex(body)
-        
 
         self.display_list = self.layout(text)
         self.draw()
-        
 
 
-Browser().load('https://browser.engineering/examples/xiyouji.html')
+Browser().load("https://browser.engineering/examples/xiyouji.html")
 tkinter.mainloop()
-
-

@@ -28,9 +28,9 @@ ch. 1
 
 ch.2 
 - Scrolling (mouse wheel & up/down keys)
+- Line breaks with paragraph spacing 
 
 ### Todo:
-- Line breaks ('\n') with paragraph breaks
 - Emoji support
 - Allow browser resizing
 - Zoom for font size
