@@ -1,0 +1,3 @@
+[tool.ruff]
+ignore-init-module-imports = true
+unfixable = ["F401"]

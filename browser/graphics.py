@@ -1,6 +1,6 @@
-from util import lex
-from request import request
-from constants import HSTEP, VSTEP, HEIGHT, WIDTH, SCROLL_STEP
+from browser.util import lex
+from browser.request import request
+from browser.constants import HSTEP, VSTEP, HEIGHT, WIDTH, SCROLL_STEP
 import tkinter
 
 

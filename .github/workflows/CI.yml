@@ -25,4 +25,4 @@ jobs:
           ruff --exclude tests --format=github --target-version=py310 .
       - name: Test with pytest
         run: |
-          python -m pytest tests/test.py
+          python -m pytest tests

@@ -1,4 +1,4 @@
-from constants import ENTITIES
+from browser.constants import ENTITIES
 import socket
 import ssl
 

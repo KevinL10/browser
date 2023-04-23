@@ -1,4 +1,4 @@
-from constants import ENTITIES
+from browser.constants import ENTITIES
 
 
 # Returns all non-tag text, replacing entities with their corresponding symbols
