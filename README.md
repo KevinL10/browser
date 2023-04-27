@@ -33,4 +33,9 @@ ch.2
 - Emoji support
 - Allow browser resizing
 - Zoom for font size
+- newlines
 
+
+
+ch.3 
+-
