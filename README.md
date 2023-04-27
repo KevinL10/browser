@@ -24,11 +24,10 @@ ch. 1
 - Support gzip compression
 - Handle redirects
 - HTTP response caching
-
+- Entities
 
 ch.2 
 - Scrolling (mouse wheel & up/down keys)
-- Line breaks with paragraph spacing 
 
 ### Todo:
 - Emoji support

@@ -1,7 +1,8 @@
-from browser.util import lex
+from browser.lexer import lex, Tag
 from browser.request import request
-from browser.constants import HSTEP, VSTEP, PSTEP, HEIGHT, WIDTH, SCROLL_STEP
+from browser.constants import HSTEP, VSTEP, HEIGHT, WIDTH, SCROLL_STEP
 import tkinter
+import tkinter.font
 
 
 class Browser:
@@ -17,6 +18,13 @@ class Browser:
         # Linux mouse wheel bindings
         self.window.bind("<Button-4>", self.scrollup)
         self.window.bind("<Button-5>", self.scrolldown)
+        
+        self.font = tkinter.font.Font(
+            family="Times",
+            size=16,
+            weight="bold",
+            slant="italic",
+        )
 
     def scrollup(self, e):
         self.scroll = max(0, self.scroll - SCROLL_STEP)
@@ -28,20 +36,25 @@ class Browser:
 
     # Returns the coordinates (relative to start of the PAGE)
     # for each character of the text
-    def layout(self, text):
+    def layout(self, tokens):
         display_list = []
         cursor_x, cursor_y = HSTEP, VSTEP
-        for c in text:
-            if c == '\n':
-                cursor_x = HSTEP
-                cursor_y += VSTEP + PSTEP
 
-            display_list.append((cursor_x, cursor_y, c))
-            cursor_x += HSTEP
+        for token in tokens:
+            if isinstance(token, Tag):
+                continue
+            
+            for word in token.text.split():
+                w = self.font.measure(word)
+                cursor_x += w
 
-            if cursor_x >= WIDTH - HSTEP:
-                cursor_x = HSTEP
-                cursor_y += VSTEP
+                if cursor_x >= WIDTH - HSTEP:
+                    cursor_y += self.font.metrics("linespace") * 1.25
+                    cursor_x = HSTEP
+
+                display_list.append((cursor_x, cursor_y, word))
+                cursor_x += w + self.font.measure(" ")
+
         return display_list
 
     # Draws the to-be-displayed text; calculates the position
@@ -54,7 +67,7 @@ class Browser:
                 continue
             if y + VSTEP < self.scroll:
                 continue
-            self.canvas.create_text(x, y - self.scroll, text=c)
+            self.canvas.create_text(x, y - self.scroll, text=c, anchor='nw')
 
     # Renders the contents of the url to the canvas
     def load(self, url):
@@ -65,5 +78,5 @@ class Browser:
         self.draw()
 
 
-Browser().load("https://browser.engineering/examples/xiyouji.html")
+Browser().load("https://example.org")
 tkinter.mainloop()
