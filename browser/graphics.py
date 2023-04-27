@@ -51,4 +51,5 @@ class Browser:
 
 # Browser().load("https://example.org")
 Browser().load("file://./tests/index.html")
+# Browser().load("https://browser.engineering/text.html")
 tkinter.mainloop()

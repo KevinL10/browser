@@ -20,22 +20,31 @@ ch. 1
 
 
 ### Todo:
-- Custom testing infrastructure (serving test websites with specific headers / content)
-- Support gzip compression
-- Handle redirects
-- HTTP response caching
-- Entities
 
 ch.2 
 - Scrolling (mouse wheel & up/down keys)
 
 ### Todo:
-- Emoji support
-- Allow browser resizing
-- Zoom for font size
-- newlines
 
 
 
 ch.3 
--
+- font size, weight, slant (support for `<big>, <small>, <i>, <b>, <br>`)
+- font caching
+
+### Todo:
+- ch. 1: Custom testing infrastructure (serving test websites with specific headers / content)
+- ch. 1: Support gzip compression
+- ch. 1: Handle redirects
+- ch. 1: HTTP response caching
+- ch. 1: Entities
+
+- ch. 2: Emoji support
+- ch. 2: Allow browser resizing
+- ch. 2: Zoom for font size
+- ch. 2: newlines
+
+- ch. 3: Superscripts (`<sup>`)
+- ch. 3: Soft hyphens – breaking a long word across lines
+- ch. 3: Small caps (`<abbr>`)
+- ch. 4: Preformatted text (`<pre>`)

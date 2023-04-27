@@ -2,6 +2,20 @@ from browser.constants import HSTEP, VSTEP, WIDTH
 from browser.lexer import Tag, Text
 import tkinter.font
 
+FONTS = {}
+
+
+def get_font(size, weight, slant):
+    key = (size, weight, slant)
+    if key not in FONTS:
+        FONTS[(size, weight, slant)] = tkinter.font.Font(
+            family="Times",
+            size=size,
+            weight=weight,
+            slant=slant,
+        )
+    return FONTS[key]
+
 # Represents the layout of the web page (including font, position, size, etc.)
 class Layout:
     def __init__(self, tokens):
@@ -24,10 +38,8 @@ class Layout:
         # Flushy any remaining layout elements
         self.flush()
 
-        
-    # add the token to the layout
+
     def add_token(self, token):
-        print(token)
         if isinstance(token, Text):
             self.add_text(token)
         elif token.tag == "i":
@@ -53,22 +65,13 @@ class Layout:
             self.cursor_y += VSTEP
 
 
-    # adds the text to the layout
     def add_text(self, token):
-        font = tkinter.font.Font(
-            family="Times",
-            size=self.size,
-            weight=self.weight,
-            slant=self.style,
-        )
-
+        font = get_font(self.size, self.weight, self.style)
         for word in token.text.split():
             w = font.measure(word)
-            self.cursor_x += w
 
-            if self.cursor_x >= WIDTH - HSTEP:
+            if self.cursor_x + w >= WIDTH - HSTEP:
                 self.flush()
-
 
             self.line.append((self.cursor_x, word, font))
             self.cursor_x += w + font.measure(" ")
@@ -76,11 +79,11 @@ class Layout:
     # Flushes the current display line:
     # - Aligns the word along the bottom of the line
     # - Add all of the words in the current line to the display_list
-    # - Updates cursor_x and cursor_y 
+    # - Updates cursor_x and cursor_y
     def flush(self):
         if not self.line:
             return
-        
+
         metrics = [font.metrics() for x, word, font in self.line]
         max_ascent = max([metric["ascent"] for metric in metrics])
         max_descent = max([metric["descent"] for metric in metrics])
