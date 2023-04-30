@@ -1,5 +1,5 @@
 from browser.constants import HSTEP, VSTEP, WIDTH
-from browser.lexer import Tag, Text
+from browser.lexer import Text
 import tkinter.font
 
 FONTS = {}
@@ -58,12 +58,15 @@ class Layout:
             self.size += 4
         elif token.tag == "/big":
             self.size -= 4
+        elif token.tag == "sup":
+            self.size //= 2
+        elif token.tag == "/sup":
+            self.size *= 2
         elif token.tag == "br":
             self.flush()
         elif token.tag == "/p":
             self.flush()
             self.cursor_y += VSTEP
-
 
     def add_text(self, token):
         font = get_font(self.size, self.weight, self.style)

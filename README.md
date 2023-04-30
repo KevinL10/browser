@@ -34,7 +34,6 @@ ch.3
 
 ### Todo:
 - ch. 1: Custom testing infrastructure (serving test websites with specific headers / content)
-- ch. 1: Support gzip compression
 - ch. 1: Handle redirects
 - ch. 1: HTTP response caching
 - ch. 1: Entities

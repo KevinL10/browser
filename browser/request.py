@@ -1,4 +1,4 @@
-from browser.constants import ENTITIES
+from browser.constants import ENTITIES, MAX_REDIRECTS
 import socket
 import ssl
 import gzip
@@ -36,7 +36,10 @@ def parse_url(url):
 
 
 # Returns raw data pointed to by url
-def request(url):
+def request(url, num_redirects=0):
+    if num_redirects > MAX_REDIRECTS:
+        raise Exception("Exceeded maximum number of redirects")
+
     scheme, host, port, path = parse_url(url)
 
     if scheme == "file":
@@ -69,7 +72,6 @@ def request(url):
     statusline = response.readline()
     version, status, explanation = statusline.split(b" ", 2)
 
-    assert status == b"200", f"{status}: {explanation}"
 
     headers = {}
 
@@ -81,6 +83,10 @@ def request(url):
         headers[header.lower().decode()] = value.strip().decode()
 
     assert "transfer-encoding" not in headers
+
+    # Handle redirects
+    if 300 <= int(status) <= 399:
+        return request(headers["location"], num_redirects + 1)
 
     body = response.read()
 

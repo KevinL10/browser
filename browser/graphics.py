@@ -49,7 +49,9 @@ class Browser:
         self.draw()
 
 
-Browser().load("https://example.org")
+# Browser().load("https://example.org")
+
 # Browser().load("file://./tests/index.html")
-# Browser().load("https://browser.engineering/text.html")
+# Browser().load("https://browser.engineering/redirect")
+Browser().load("https://browser.engineering/http.html")
 tkinter.mainloop()

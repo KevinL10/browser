@@ -14,3 +14,6 @@ PSTEP = 5
 
 # Number of pixels to scroll down the page on "Down" key
 SCROLL_STEP = 100
+
+# Maximum number of redirects before erroring
+MAX_REDIRECTS = 5
