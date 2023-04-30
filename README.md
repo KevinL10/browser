@@ -34,9 +34,8 @@ ch.3
 
 ### Todo:
 - ch. 1: Custom testing infrastructure (serving test websites with specific headers / content)
-- ch. 1: Handle redirects
 - ch. 1: HTTP response caching
-- ch. 1: Entities
+- ch. 1: Support transfer-encoding: chunked
 
 - ch. 2: Emoji support
 - ch. 2: Allow browser resizing

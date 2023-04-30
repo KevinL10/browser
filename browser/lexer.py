@@ -1,3 +1,4 @@
+from browser.constants import ENTITIES
 
 class Text:
     def __init__(self, text):
@@ -29,8 +30,10 @@ def lex(body):
     if not in_tag and text:
         out.append(Text(text))
 
-    # TODO: replace character entities
-    # for reserved, entity in ENTITIES.items():
-    #     text = text.replace(entity, reserved)
+
+    for element in out:
+        if isinstance(element, Text):
+            for reserved, entity in ENTITIES.items():
+                element.text = element.text.replace(entity, reserved)
     
     return out

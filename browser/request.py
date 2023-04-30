@@ -88,6 +88,8 @@ def request(url, num_redirects=0):
     if 300 <= int(status) <= 399:
         return request(headers["location"], num_redirects + 1)
 
+    assert status == b"200", f"{status}: {explanation}"
+    
     body = response.read()
 
     if "content-encoding" in headers:
