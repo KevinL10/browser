@@ -1,6 +1,7 @@
 from browser.constants import ENTITIES
 import socket
 import ssl
+import gzip
 
 
 # Returns: scheme, host, port, data (could be a path or raw HTML depending on scheme)
@@ -12,7 +13,7 @@ def parse_url(url):
     elif url.startswith("file://"):
         return "file", None, None, url[len("file://") :]
     elif url.startswith("view-source:"):
-        url = url[len("view-source:"):]
+        url = url[len("view-source:") :]
 
     scheme, url = url.split("://", 1)
     assert scheme in ["http", "https"], f"Unknown scheme {scheme}"
@@ -60,31 +61,36 @@ def request(url):
         f"GET {path} HTTP/1.1\r\n".encode("utf8")
         + f"Host: {host}\r\n".encode("utf8")
         + "Connection: close\r\n".encode("utf8")
+        + "Accept-Encoding: gzip\r\n".encode("utf8")
         + "User-Agent: browser\r\n\r\n".encode("utf8")
     )
 
-    response = s.makefile("r", encoding="utf8", newline="\n")
+    response = s.makefile("rb", newline="\r\n")
     statusline = response.readline()
-    version, status, explanation = statusline.split(" ", 2)
+    version, status, explanation = statusline.split(b" ", 2)
 
-    assert status == "200", f"{status}: {explanation}"
+    assert status == b"200", f"{status}: {explanation}"
 
     headers = {}
 
     while True:
         line = response.readline()
-        if line == "\r\n":
+        if line == b"\r\n":
             break
-        header, value = line.split(":", 1)
-        headers[header.lower()] = value.strip()
+        header, value = line.split(b":", 1)
+        headers[header.lower().decode()] = value.strip().decode()
 
     assert "transfer-encoding" not in headers
-    assert "content-encoding" not in headers
 
     body = response.read()
+
+    if "content-encoding" in headers:
+        body = gzip.decompress(body)
+
+    body = body.decode("utf-8")
     s.close()
 
-    # For view-source schemes, we show the raw HTML output 
+    # For view-source schemes, we show the raw HTML output
     # by replacing reserved characters with entities
     if url.startswith("view-source:"):
         for reserved, entity in ENTITIES.items():

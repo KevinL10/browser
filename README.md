@@ -42,7 +42,6 @@ ch.3
 - ch. 2: Emoji support
 - ch. 2: Allow browser resizing
 - ch. 2: Zoom for font size
-- ch. 2: newlines
 
 - ch. 3: Superscripts (`<sup>`)
 - ch. 3: Soft hyphens – breaking a long word across lines

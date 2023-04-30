@@ -1,6 +1,6 @@
-from browser.lexer import lex, Tag, Text
+from browser.lexer import lex
 from browser.request import request
-from browser.constants import HSTEP, VSTEP, HEIGHT, WIDTH, SCROLL_STEP
+from browser.constants import VSTEP, HEIGHT, WIDTH, SCROLL_STEP
 from browser.layout import Layout
 import tkinter
 import tkinter.font
@@ -49,7 +49,7 @@ class Browser:
         self.draw()
 
 
-# Browser().load("https://example.org")
-Browser().load("file://./tests/index.html")
+Browser().load("https://example.org")
+# Browser().load("file://./tests/index.html")
 # Browser().load("https://browser.engineering/text.html")
 tkinter.mainloop()
