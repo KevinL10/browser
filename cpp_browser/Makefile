@@ -1,20 +1,20 @@
 EXE = browser
-OBJ = browser.o
-CXX = g++
+OBJS = browser.o
+WARNINGS = -pedantic -Wall -Werror -Wfatal-errors -Wextra -Wno-unused-parameter -Wno-unused-variable
 
-all: $(EXE)
-
-$(EXE): browser.o
-	$(CXX) -o browser browser.o
-
-$(EXE).o: browser.cpp
-	$(CXX) -c browser.cpp -o browser.o
+CXXFLAGS = -std=c++14 -g -O0 $(WARNINGS) -MP -c 
+CXX = clang++
+LD = clang++
+LDFLAGS = -std=c++14 -lssl
 
 
+all: browser
 
+$(EXE): $(OBJS)
+	$(LD) $(OBJS) $(LDFLAGS) -o $(EXE)
+
+browser.o: browser.cpp  browser.h
+	$(CXX) $(CXXFLAGS) browser.cpp -o $@
 
 clean:
-	rm -rf $(EXE) $(OBJ)
-
-
-.PHONY: all tidy clean
+	-rm -rf *.o $(EXE)
