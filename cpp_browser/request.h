@@ -18,4 +18,11 @@ struct HttpResponse {
     string body;
 };
 
+HttpResponse sendGetRequest(string url);
+
+
+// should be private; testing for now
+URL parseUrl(string url);
+string sendHttpGetRequest(const URL &url);
+string sendHttpsGetRequest(const URL &url);
 #endif

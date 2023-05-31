@@ -1,5 +1,5 @@
 EXE = browser
-OBJS = browser.o
+OBJS = browser.o request.o
 WARNINGS = -pedantic -Wall -Werror -Wfatal-errors -Wextra -Wno-unused-parameter -Wno-unused-variable
 
 CXXFLAGS = -std=c++14 -g -O0 $(WARNINGS) -MP -c 
@@ -13,8 +13,11 @@ all: browser
 $(EXE): $(OBJS)
 	$(LD) $(OBJS) $(LDFLAGS) -o $(EXE)
 
-browser.o: browser.cpp  browser.h
+browser.o: browser.cpp
 	$(CXX) $(CXXFLAGS) browser.cpp -o $@
+
+request.o: request.cpp request.h
+	$(CXX) $(CXXFLAGS) request.cpp -o $@
 
 clean:
 	-rm -rf *.o $(EXE)
