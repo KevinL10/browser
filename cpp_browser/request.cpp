@@ -9,12 +9,22 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include <cctype>
 #include <cstring>
 #include <iostream>
+
+#include "utils.h"
 
 #define BUFFER_SIZE 1024
 
 using namespace std;
+
+void HttpResponse::print() {
+    for (auto &[key, value] : headers) {
+        cout << "header:" << key << "=" << value << "\n";
+    }
+    cout << "body:\n" << body;
+}
 
 // Creates a socket to the given url hostname and attempts connection. Returns
 // -1 on failure.
@@ -165,4 +175,48 @@ URL parseUrl(string url) {
         output.path = url.substr(slashIndex);
     }
     return output;
+}
+
+// Returns a structured HttpResponse object from the raw HTTP response
+HttpResponse extractHeadersAndBody(string response) {
+    // replaceAll(response, "\r\n", "\n");
+
+    HttpResponse httpResponse;
+    stringstream ss(response);
+
+    string version, status, explanation;
+    ss >> version >> status >> explanation;
+    if (status != "200") {
+        cerr << status << " " << explanation << "\n";
+        return httpResponse;
+    }
+    // ignore the \r\n after the first line
+    ss.ignore();
+    ss.ignore();
+
+    string headerLine;
+    while (getline(ss, headerLine, '\n')) {
+        if (headerLine == "\r") {
+            break;
+        }
+
+        size_t colonIndex = headerLine.find(":");
+        string header = headerLine.substr(0, colonIndex);
+        string value = headerLine.substr(colonIndex + 1);
+
+        // lowercase header and strip value
+        transform(header.begin(), header.end(), header.begin(),
+                  [](unsigned char c) { return tolower(c); });
+        httpResponse.headers[header] = trim(value);
+    }
+
+    httpResponse.body = ss.str().substr(ss.tellg());
+    return httpResponse;
+}
+
+HttpResponse sendGetRequest(string url) {
+    URL structuredUrl = parseUrl(url);
+    string response = sendHttpsGetRequest(structuredUrl);
+    HttpResponse httpResponse = extractHeadersAndBody(response);
+    return httpResponse;
 }

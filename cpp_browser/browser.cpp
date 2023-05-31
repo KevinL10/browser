@@ -9,11 +9,7 @@ int main(int argc, char **argv) {
     }
 
     string url = (argc == 1) ? "https://example.org" : argv[1];
+    HttpResponse httpResponse = sendGetRequest(url);
 
-    URL structuredUrl = parseUrl(url);
-    cout << structuredUrl.hostname << " " << structuredUrl.path << " "
-         << structuredUrl.scheme << "\n";
-    string response = sendHttpsGetRequest(structuredUrl);
-
-    cout << response << "\n";
+    httpResponse.print();
 }

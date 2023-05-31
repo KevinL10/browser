@@ -16,13 +16,10 @@ struct URL {
 struct HttpResponse {
     map<string, string> headers;
     string body;
+
+    void print(); 
 };
 
 HttpResponse sendGetRequest(string url);
 
-
-// should be private; testing for now
-URL parseUrl(string url);
-string sendHttpGetRequest(const URL &url);
-string sendHttpsGetRequest(const URL &url);
 #endif
