@@ -18,8 +18,10 @@ struct HttpResponse {
     string body;
 
     void print(); 
+    string toString();
 };
 
 HttpResponse sendGetRequest(string url);
+
 
 #endif

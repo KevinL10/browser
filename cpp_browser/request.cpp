@@ -26,6 +26,15 @@ void HttpResponse::print() {
     cout << "body:\n" << body;
 }
 
+string HttpResponse::toString() {
+    string out = "";
+    for (auto &[key, value] : headers) {
+        out += "header:" + key + "=" + value + "\n";
+    }
+    return out +  "body:\n" + body;
+}
+
+
 // Creates a socket to the given url hostname and attempts connection. Returns
 // -1 on failure.
 int create_socket(const URL &url) {

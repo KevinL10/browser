@@ -1,15 +1,35 @@
+#include <gtkmm.h>
+
+#include <iostream>
+
 #include "request.h"
 
-using namespace std;
+class MyWindow : public Gtk::Window {
+   public:
+    MyWindow();
+    Gtk::TextView m_TextView;
+    Gtk::ScrolledWindow m_ScrolledWindow;
+};
 
-int main(int argc, char **argv) {
-    if (argc > 2) {
-        cout << "Usage: ./browser <url>\n";
-        return 0;
-    }
+MyWindow::MyWindow() {
+    set_title("Browser");
+    set_default_size(800, 600);
 
-    string url = (argc == 1) ? "https://example.org" : argv[1];
-    HttpResponse httpResponse = sendGetRequest(url);
+    m_ScrolledWindow.set_policy(Gtk::PolicyType::EXTERNAL,
+                                Gtk::PolicyType::AUTOMATIC);
+    set_child(m_ScrolledWindow);
 
-    httpResponse.print();
+    HttpResponse response =
+        sendGetRequest("https://browser.engineering/examples/xiyouji.html");
+    auto regTextBuffer = Gtk::TextBuffer::create();
+    regTextBuffer->set_text(response.body);
+    m_TextView.set_buffer(regTextBuffer);
+
+    m_ScrolledWindow.set_child(m_TextView);
+}
+
+int main(int argc, char* argv[]) {
+    auto app = Gtk::Application::create("org.gtkmm.examples.base");
+
+    return app->make_window_and_run<MyWindow>(argc, argv);
 }

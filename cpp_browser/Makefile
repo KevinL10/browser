@@ -2,10 +2,10 @@ EXE = browser
 OBJS = browser.o request.o utils.o
 WARNINGS = -pedantic -Wall -Werror -Wfatal-errors -Wextra -Wno-unused-parameter -Wno-unused-variable
 
-CXXFLAGS = -std=c++17 -g -O0 $(WARNINGS) -MP -c 
+CXXFLAGS = -std=c++17 -g -O0 $(WARNINGS) -MP -c  $(shell pkg-config --cflags gtkmm-4.0)
 CXX = clang++
 LD = clang++
-LDFLAGS = -std=c++17 -lssl
+LDFLAGS = -std=c++17 -lssl $(shell pkg-config --libs gtkmm-4.0)
 
 
 all: browser
