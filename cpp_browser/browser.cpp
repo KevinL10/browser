@@ -30,10 +30,14 @@ MyWindow::MyWindow() {
 
     auto iter = refTextBuffer->get_iter_at_offset(0);
     for (LayoutElement element : elements) {
-        iter = refTextBuffer->insert_with_tag(iter, element.text, element.toTextTag(refTextBuffer));
+        iter = refTextBuffer->insert_with_tag(iter, element.text,
+                                              element.toTextTag(refTextBuffer));
     }
 
     m_TextView.set_buffer(refTextBuffer);
+    m_TextView.set_editable(false);
+    m_TextView.set_cursor_visible(false);
+    m_TextView.set_wrap_mode(Gtk::WrapMode::WORD);
     m_ScrolledWindow.set_child(m_TextView);
 }
 

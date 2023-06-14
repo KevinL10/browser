@@ -1,5 +1,3 @@
-
-
 #include "layout.h"
 
 #include <iostream>
@@ -55,7 +53,7 @@ vector<LayoutElement> layout(vector<Token> tokens) {
             continue;
         } else if (token.text == "/p") {
             // HACK: add new line and indent after </p>
-            out.push_back(LayoutElement(weight, style, size, "\n\t"));
+            out.push_back(LayoutElement(weight, style, size, "\n\n"));
         }
     }
 
