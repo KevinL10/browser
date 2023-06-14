@@ -1,5 +1,5 @@
 EXE = browser
-OBJS = browser.o request.o utils.o
+OBJS = browser.o request.o utils.o lexer.o layout.o
 WARNINGS = -pedantic -Wall -Werror -Wfatal-errors -Wextra -Wno-unused-parameter -Wno-unused-variable
 
 CXXFLAGS = -std=c++17 -g -O0 $(WARNINGS) -MP -c  $(shell pkg-config --cflags gtkmm-4.0)
@@ -21,6 +21,12 @@ request.o: request.cpp request.h
 
 utils.o: utils.cpp utils.h
 	$(CXX) $(CXXFLAGS) utils.cpp -o $@
+
+lexer.o: lexer.cpp lexer.h
+	$(CXX) $(CXXFLAGS) lexer.cpp -o $@
+
+layout.o: layout.cpp layout.h
+	$(CXX) $(CXXFLAGS) layout.cpp -o $@
 
 clean:
 	-rm -rf *.o $(EXE)

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "layout.h"
+#include "lexer.h"
 #include "request.h"
 
 class MyWindow : public Gtk::Window {
@@ -21,10 +23,17 @@ MyWindow::MyWindow() {
 
     HttpResponse response =
         sendGetRequest("https://browser.engineering/examples/xiyouji.html");
-    auto regTextBuffer = Gtk::TextBuffer::create();
-    regTextBuffer->set_text(response.body);
-    m_TextView.set_buffer(regTextBuffer);
+    auto refTextBuffer = Gtk::TextBuffer::create();
 
+    vector<Token> tokens = lex(response.body);
+    vector<LayoutElement> elements = layout(tokens);
+
+    auto iter = refTextBuffer->get_iter_at_offset(0);
+    for (LayoutElement element : elements) {
+        iter = refTextBuffer->insert_with_tag(iter, element.text, element.toTextTag(refTextBuffer));
+    }
+
+    m_TextView.set_buffer(refTextBuffer);
     m_ScrolledWindow.set_child(m_TextView);
 }
 
