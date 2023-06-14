@@ -11,18 +11,32 @@ class MyWindow : public Gtk::Window {
     MyWindow();
     Gtk::TextView m_TextView;
     Gtk::ScrolledWindow m_ScrolledWindow;
+    Gtk::Grid m_Grid;
+    Gtk::Button m_Button;
 };
 
-MyWindow::MyWindow() {
+MyWindow::MyWindow() : m_Button("top bar") {
     set_title("Browser");
     set_default_size(800, 600);
 
+    m_Grid.set_expand(true);
+    m_Grid.set_row_homogeneous(true);
+    m_Grid.set_column_homogeneous(true);
+
+    // create header
+    m_Grid.attach(m_Button, 0, 0);
+
+    // create body
+    m_Grid.attach(m_ScrolledWindow, 0, 1, 1, 14);
+    set_child(m_Grid);
+
     m_ScrolledWindow.set_policy(Gtk::PolicyType::EXTERNAL,
                                 Gtk::PolicyType::AUTOMATIC);
-    set_child(m_ScrolledWindow);
 
     HttpResponse response =
         sendGetRequest("https://browser.engineering/examples/xiyouji.html");
+    // sendGetRequest("https://example.org/index.html");
+
     auto refTextBuffer = Gtk::TextBuffer::create();
 
     vector<Token> tokens = lex(response.body);
