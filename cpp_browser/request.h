@@ -23,5 +23,6 @@ struct HttpResponse {
 
 HttpResponse sendGetRequest(string url);
 
-
+const string HTTPX_PREFIX = "http";
+const string FILE_PREFIX = "file";
 #endif

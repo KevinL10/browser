@@ -22,6 +22,6 @@ struct LayoutElement {
     Glib::RefPtr<Gtk::TextTag> toTextTag(Glib::RefPtr<Gtk::TextBuffer>);
 };
 
-vector<LayoutElement> layout(vector<Token> tokens);
+// vector<LayoutElement> layout(vector<Token> tokens);
 
 #endif

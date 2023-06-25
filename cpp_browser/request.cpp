@@ -31,9 +31,8 @@ string HttpResponse::toString() {
     for (auto &[key, value] : headers) {
         out += "header:" + key + "=" + value + "\n";
     }
-    return out +  "body:\n" + body;
+    return out + "body:\n" + body;
 }
-
 
 // Creates a socket to the given url hostname and attempts connection. Returns
 // -1 on failure.
@@ -223,9 +222,27 @@ HttpResponse extractHeadersAndBody(string response) {
     return httpResponse;
 }
 
+string getFileContents(string url) {
+    url = url.substr(FILE_PREFIX.length() + 3);
+
+    ifstream ifs(url);
+    return string(std::istreambuf_iterator<char>(ifs),
+                  std::istreambuf_iterator<char>());
+}
+
 HttpResponse sendGetRequest(string url) {
-    URL structuredUrl = parseUrl(url);
-    string response = sendHttpsGetRequest(structuredUrl);
-    HttpResponse httpResponse = extractHeadersAndBody(response);
+    HttpResponse httpResponse;
+
+    if (url.substr(0, HTTPX_PREFIX.length()) == HTTPX_PREFIX) {
+        URL structuredUrl = parseUrl(url);
+        string response = sendHttpsGetRequest(structuredUrl);
+        httpResponse = extractHeadersAndBody(response);
+        return httpResponse;
+    } else if (url.substr(0, FILE_PREFIX.length()) == FILE_PREFIX) {
+        httpResponse.body = getFileContents(url);
+        return httpResponse;
+    }
+
     return httpResponse;
 }
+

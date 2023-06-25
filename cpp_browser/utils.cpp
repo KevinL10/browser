@@ -24,15 +24,22 @@ std::string trim(std::string const& original) {
     return std::string(left, right);
 }
 
-
-
-
-
 void replaceAll(std::string& subject, const std::string& search,
-                          const std::string& replace) {
+                const std::string& replace) {
     size_t pos = 0;
     while ((pos = subject.find(search, pos)) != std::string::npos) {
-         subject.replace(pos, search.length(), replace);
-         pos += replace.length();
+        subject.replace(pos, search.length(), replace);
+        pos += replace.length();
     }
+}
+
+std::string lower(const std::string& str) {
+    std::string result;
+    result.reserve(str.size());
+
+    for (char c : str) {
+        result.push_back(std::tolower(c));
+    }
+
+    return result;
 }
