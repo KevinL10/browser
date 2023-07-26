@@ -1,4 +1,4 @@
-from browser.lexer import lex
+from browser.lexer import HTMLParser
 from browser.request import request
 from browser.constants import VSTEP, HEIGHT, WIDTH, SCROLL_STEP
 from browser.layout import Layout
@@ -44,14 +44,14 @@ class Browser:
     # Renders the contents of the url to the canvas
     def load(self, url):
         headers, body = request(url)
-        tokens = lex(body)
-        self.display_list = Layout(tokens).display_list
+        self.node = HTMLParser(body).parse()
+        self.display_list = Layout(self.node).display_list
         self.draw()
 
 
-Browser().load("view-source:https://example.org")
+# Browser().load("file:///home/vever/cs/browser/browser/tests/index.html")
 
 # Browser().load("file://./tests/index.html")
 # Browser().load("https://browser.engineering/redirect")
 # Browser().load("https://browser.engineering/http.html")
-tkinter.mainloop()
+# tkinter.mainloop()

@@ -8,21 +8,50 @@ class Text:
     def __repr__(self):
         return self.text
 
+
 class Element:
-    def __init__(self, tag, parent):
+    def __init__(self, tag, attributes, parent):
         self.tag = tag
+        self.attributes = attributes
         self.children = []
         self.parent = parent
 
     def __repr__(self):
         return "<" + self.tag + ">"
 
+
+"""
+We represent the document as a list of unfinished open tags. When we encounter a 
+closing tag, we remove the topmost tag from the list and add it as a child of the 
+previous tag.
+"""
+
+
 class HTMLParser:
     def __init__(self, body):
         self.body = body
         self.unfinished = []
+        self.SELF_CLOSING_TAGS = [
+            "area",
+            "base",
+            "br",
+            "col",
+            "embed",
+            "hr",
+            "img",
+            "input",
+            "link",
+            "meta",
+            "param",
+            "source",
+            "track",
+            "wbr",
+        ]
 
-    # Returns a tree structure of the HTML
+    """
+    Returns a tree structure of the HTML.
+    """
+
     def parse(self):
         in_tag = False
         text = ""
@@ -45,14 +74,45 @@ class HTMLParser:
 
         return self.finish()
 
-    # Adds the current text to the HTML tree
+    '''
+    Returns the type of tag and key-value attributes
+    '''
+    def get_attributes(self, text):
+        parts = text.split()
+        if len(parts) == 1:
+            return parts[0], {}
+
+        print(parts)
+        tag = parts[0]
+        attributes = {}
+        for part in parts[1:]:
+            if "=" in part:
+                key, value = part.split("=", 1)
+                if len(value) > 2 and value[0] in ["'", "\""]:
+                    value = value[1:-1]
+            else:
+                attributes[part.lower()] = ""
+        return tag, attributes
+
+    """
+    Adds the given text as a child of the current open tag.
+    """
+
     def add_text(self, text):
+        if text.isspace():
+            return
         parent = self.unfinished[-1]
         node = Text(text, parent)
         parent.children.append(node)
 
-    # Adds the current tag to the HTML tree
+    """
+    Adds the current tag to the HTML tree. If the tag is open, add it to the list of 
+    unfinished tags. Otherwise, close the topmost tag.
+    """
+
     def add_tag(self, tag):
+        tag, attributes = self.get_attributes(tag)
+        # ignore DOCTYPE tag (<!DOCTYPE html> and comments (<!-- ... -->)
         if tag.startswith("!"):
             return
 
@@ -62,12 +122,19 @@ class HTMLParser:
             node = self.unfinished.pop()
             parent = self.unfinished[-1]
             parent.children.append(node)
+        elif tag in self.SELF_CLOSING_TAGS:
+            parent = self.unfinished[-1]
+            node = Element(tag, attributes, parent)
+            parent.children.append(node)
         else:
             parent = self.unfinished[-1] if self.unfinished else None
-            node = Element(tag, parent)
+            node = Element(tag, attributes, parent)
             self.unfinished.append(node)
 
-    # Finishes any unfinished nodes in the HTML tree
+    """
+    Closes any remaining open tags in the HTML tree and returns the root node.
+    """
+
     def finish(self):
         if len(self.unfinished) == 0:
             self.add_tag("html")
@@ -78,15 +145,16 @@ class HTMLParser:
             parent.children.append(node)
 
         return self.unfinished.pop()
-    
 
-def print_tree(node, indent = 0):
+
+def print_tree(node, indent=0):
     print(" " * indent, node)
     for child in node.children:
         print_tree(child, indent + 2)
 
 
-k = HTMLParser("""<!DOCTYPE html>
+k = HTMLParser(
+    """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -96,9 +164,9 @@ k = HTMLParser("""<!DOCTYPE html>
 </head>
 <body>
     Hi! this is a test 
-    
     <b>bold text</b>
 </body>
-</html>""")
+</html>"""
+)
 
 print_tree(k.parse())

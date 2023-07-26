@@ -1,9 +1,13 @@
-from browser.request import load
+from browser.graphics import Browser
+import sys
+import tkinter
 
 if __name__ == "__main__":
-    import sys
 
+    browser = Browser()    
     if len(sys.argv) == 2:
-        load(sys.argv[1])
+        browser.load(sys.argv[1])
     else:
-        load("https://example.org")
+        browser.load("https://example.org")
+
+    tkinter.mainloop()

@@ -18,7 +18,7 @@ def get_font(size, weight, slant):
 
 # Represents the layout of the web page (including font, position, size, etc.)
 class Layout:
-    def __init__(self, tokens):
+    def __init__(self, node):
         self.display_list = []
         self.cursor_x = HSTEP
         self.cursor_y = VSTEP
@@ -26,45 +26,60 @@ class Layout:
         self.style = "roman"
         self.size = 16
 
-        # Text is aligned along the top by default (instead of the bottom), so
-        # we use a two-pass approach: first compute the x-coordinates of the
-        # elements along the current line, then adjust the y-coordinates so that
-        # all elements are aligned along the bottom
+        # A list of (x, word, font) tuples representing the current line
+        # The final display_list is computed by aligning the words along the
+        # bottom of the line
         self.line = []
 
-        for token in tokens:
-            self.add_token(token)
+        self.recurse(node)
 
         # Flushy any remaining layout elements
         self.flush()
 
-
-    def add_token(self, token):
-        if isinstance(token, Text):
-            self.add_text(token)
-        elif token.tag == "i":
+    '''
+    Recursively layout the parsed HTML tree
+    '''
+    def recurse(self, node):
+        if isinstance(node, Text):
+            self.add_text(node)
+        else:
+            self.open_tag(node.tag)
+            for child in node.children:
+                self.recurse(child)
+            self.close_tag(node.tag)
+    
+    '''
+    Updates the current weight/style/size based on the given open tag
+    '''
+    def open_tag(self, tag):
+        if tag == "i":
             self.style = "italic"
-        elif token.tag == "/i":
-            self.style = "roman"
-        elif token.tag == "b":
+        elif tag == "b":
             self.weight = "bold"
-        elif token.tag == "/b":
-            self.weight = "normal"
-        elif token.tag == "small":
+        elif tag == "small":
             self.size -= 2
-        elif token.tag == "/small":
-            self.size += 2
-        elif token.tag == "big":
+        elif tag == "big":
             self.size += 4
-        elif token.tag == "/big":
-            self.size -= 4
-        elif token.tag == "sup":
+        elif tag == "sub":
             self.size //= 2
-        elif token.tag == "/sup":
-            self.size *= 2
-        elif token.tag == "br":
+        elif tag == "br":
             self.flush()
-        elif token.tag == "/p":
+
+    '''
+    Updates the current weight/style/size based on the given close tag
+    '''
+    def close_tag(self, tag):
+        if tag == "i":
+            self.style = "roman"
+        elif tag == "b":
+            self.weight = "normal"
+        elif tag == "small":
+            self.size += 2
+        elif tag == "big":
+            self.size -= 4
+        elif tag == "sub":
+            self.size *= 2
+        elif tag == "p":
             self.flush()
             self.cursor_y += VSTEP
 

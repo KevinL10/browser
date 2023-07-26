@@ -44,4 +44,10 @@ ch.3
 - ch. 3: Superscripts (`<sup>`)
 - ch. 3: Soft hyphens – breaking a long word across lines
 - ch. 3: Small caps (`<abbr>`)
-- ch. 4: Preformatted text (`<pre>`)
+- ch. 3: Preformatted text (`<pre>`)
+
+- ch. 4: comments
+- ch. 4: paragraphs 
+- ch. 4: scripts 
+- ch. 4: quoted attributes 
+- ch. 4: syntax highlighting

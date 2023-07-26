@@ -17,3 +17,4 @@ SCROLL_STEP = 100
 
 # Maximum number of redirects before erroring
 MAX_REDIRECTS = 5
+
