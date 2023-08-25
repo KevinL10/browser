@@ -72,7 +72,6 @@ def request(url, num_redirects=0):
     statusline = response.readline()
     version, status, explanation = statusline.split(b" ", 2)
 
-
     headers = {}
 
     while True:
@@ -82,15 +81,33 @@ def request(url, num_redirects=0):
         header, value = line.split(b":", 1)
         headers[header.lower().decode()] = value.strip().decode()
 
-    assert "transfer-encoding" not in headers
-
     # Handle redirects
     if 300 <= int(status) <= 399:
         return request(headers["location"], num_redirects + 1)
 
     assert status == b"200", f"{status}: {explanation}"
-    
     body = response.read()
+
+    # Support chunked transfer-encoding. Data is sent in a series of chunks, with the
+    # length at the beginning of the chunk followed by \r\n, the chunk itself,
+    # then a closing \r\n. The last chunk is a zero-length chunk.
+    if "transfer-encoding" in headers:
+        assert headers["transfer-encoding"] == "chunked"
+
+        new_body = b""
+        pos = 0
+        while True:
+            start = body.find(b"\r\n", pos)
+            length = int(body[pos:start].decode())
+
+            if length == 0:
+                break
+
+            end = body.find(b"\r\n", start + 2)
+            new_body += body[start + 2 : end]
+            pos = end + 2
+
+        body = new_body
 
     if "content-encoding" in headers:
         body = gzip.decompress(body)
