@@ -1,7 +1,7 @@
-from browser.lexer import HTMLParser
+from browser.parser import HTMLParser
 from browser.request import request
 from browser.constants import VSTEP, HEIGHT, WIDTH, SCROLL_STEP
-from browser.layout import Layout
+from browser.layout import DocumentLayout
 import tkinter
 import tkinter.font
 
@@ -25,7 +25,9 @@ class Browser:
         self.draw()
 
     def scrolldown(self, e):
-        self.scroll += SCROLL_STEP
+        # Prevent scrolling past bottom of the page
+        max_y = max(self.document.height - HEIGHT, 0)
+        self.scroll = min(self.scroll + SCROLL_STEP, max_y)
         self.draw()
 
 
@@ -34,18 +36,25 @@ class Browser:
     # (i.e. how far the user is down the page)
     def draw(self):
         self.canvas.delete("all")
-        for x, y, c, font in self.display_list:
-            if y > self.scroll + HEIGHT:
+        for cmd in self.display_list:
+            if cmd.top > self.scroll + HEIGHT:
                 continue
-            if y + VSTEP < self.scroll:
+            if cmd.bottom + VSTEP < self.scroll:
                 continue
-            self.canvas.create_text(x, y - self.scroll, text=c, anchor='nw', font=font)
+
+            cmd.execute(self.scroll, self.canvas)
+
 
     # Renders the contents of the url to the canvas
     def load(self, url):
         headers, body = request(url)
-        self.node = HTMLParser(body).parse()
-        self.display_list = Layout(self.node).display_list
+        self.nodes = HTMLParser(body).parse()
+        self.document = DocumentLayout(self.nodes)
+        self.document.layout()
+
+        # The display_list consists of commands like DrawText and DrawRect
+        self.display_list = []
+        self.document.paint(self.display_list)
         self.draw()
 
 

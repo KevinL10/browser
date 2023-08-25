@@ -153,20 +153,20 @@ def print_tree(node, indent=0):
         print_tree(child, indent + 2)
 
 
-k = HTMLParser(
-    """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    Hi! this is a test 
-    <b>bold text</b>
-</body>
-</html>"""
-)
+# k = HTMLParser(
+#     """<!DOCTYPE html>
+# <html lang="en">
+# <head>
+#     <meta charset="UTF-8">
+#     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+#     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+#     <title>Document</title>
+# </head>
+# <body>
+#     Hi! this is a test 
+#     <b>bold text</b>
+# </body>
+# </html>"""
+# )
 
-print_tree(k.parse())
+# print_tree(k.parse())
