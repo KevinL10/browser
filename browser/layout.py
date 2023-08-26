@@ -9,7 +9,6 @@ def get_font(size, weight, slant):
     key = (size, weight, slant)
     if key not in FONTS:
         FONTS[(size, weight, slant)] = tkinter.font.Font(
-            family="Times",
             size=size,
             weight=weight,
             slant=slant,
@@ -121,7 +120,6 @@ class BlockLayout:
             child.paint(display_list)
 
         for x, y, word, font in self.display_list:
-            print(word)
             display_list.append(DrawText(x, y, word, font))
 
     """
@@ -185,7 +183,6 @@ class BlockLayout:
         # Recursively layout each block child
         for child in self.children:
             child.layout()
-            self.display_list.extend(child.display_list)
 
         if mode == "block":
             self.height = sum([child.height for child in self.children])
@@ -262,7 +259,7 @@ class BlockLayout:
         metrics = [font.metrics() for x, word, font in self.line]
         max_ascent = max([metric["ascent"] for metric in metrics])
         max_descent = max([metric["descent"] for metric in metrics])
-        baseline = self.cursor_y + max_ascent
+        baseline = self.cursor_y + 1.25 * max_ascent
 
         for rel_x, word, font in self.line:
             x = self.x + rel_x
