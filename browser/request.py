@@ -98,12 +98,12 @@ def request(url, num_redirects=0):
         pos = 0
         while True:
             start = body.find(b"\r\n", pos)
-            length = int(body[pos:start].decode())
+            length = int(body[pos:start].decode(), 16)
 
             if length == 0:
                 break
 
-            end = body.find(b"\r\n", start + 2)
+            end = start + length + 2
             new_body += body[start + 2 : end]
             pos = end + 2
 
