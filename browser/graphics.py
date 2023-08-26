@@ -1,4 +1,4 @@
-from browser.parser import HTMLParser
+from browser.parser import HTMLParser, style
 from browser.request import request
 from browser.constants import VSTEP, HEIGHT, WIDTH, SCROLL_STEP
 from browser.layout import DocumentLayout
@@ -9,7 +9,9 @@ import tkinter.font
 class Browser:
     def __init__(self):
         self.window = tkinter.Tk()
-        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT)
+        self.canvas = tkinter.Canvas(
+            self.window, width=WIDTH, height=HEIGHT, bg="white"
+        )
         self.canvas.pack()
         self.scroll = 0
 
@@ -30,7 +32,6 @@ class Browser:
         self.scroll = min(self.scroll + SCROLL_STEP, max_y)
         self.draw()
 
-
     # Draws the to-be-displayed text; calculates the position
     # of each character by subtracting the current scroll
     # (i.e. how far the user is down the page)
@@ -44,12 +45,13 @@ class Browser:
 
             cmd.execute(self.scroll, self.canvas)
 
-
     # Renders the contents of the url to the canvas
     def load(self, url):
         headers, body = request(url)
-        self.nodes = HTMLParser(body).parse()
-        self.document = DocumentLayout(self.nodes)
+        self.node = HTMLParser(body).parse()
+        style(self.node)
+
+        self.document = DocumentLayout(self.node)
         self.document.layout()
 
         # The display_list consists of commands like DrawText and DrawRect

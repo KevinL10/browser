@@ -8,7 +8,6 @@ class Text:
     def __repr__(self):
         return self.text
 
-
 class Element:
     def __init__(self, tag, attributes, parent):
         self.tag = tag
@@ -74,24 +73,26 @@ class HTMLParser:
 
         return self.finish()
 
-    '''
+    """
     Returns the type of tag and key-value attributes
-    '''
+    """
+
     def get_attributes(self, text):
         parts = text.split()
         if len(parts) == 1:
             return parts[0], {}
 
-        print(parts)
         tag = parts[0]
         attributes = {}
         for part in parts[1:]:
             if "=" in part:
                 key, value = part.split("=", 1)
-                if len(value) > 2 and value[0] in ["'", "\""]:
+                if len(value) > 2 and value[0] in ["'", '"']:
                     value = value[1:-1]
+                attributes[key.lower()] = value
             else:
                 attributes[part.lower()] = ""
+
         return tag, attributes
 
     """
@@ -146,27 +147,92 @@ class HTMLParser:
 
         return self.unfinished.pop()
 
-
 def print_tree(node, indent=0):
-    print(" " * indent, node)
+    print(" " * indent, node, node.style, getattr(node, "attributes", ""))
     for child in node.children:
         print_tree(child, indent + 2)
 
 
-# k = HTMLParser(
-#     """<!DOCTYPE html>
-# <html lang="en">
-# <head>
-#     <meta charset="UTF-8">
-#     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-#     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-#     <title>Document</title>
-# </head>
-# <body>
-#     Hi! this is a test 
-#     <b>bold text</b>
-# </body>
-# </html>"""
-# )
+# A parser class containing parsing functions to advance through the text
+class CSSParser:
+    # Initialize the CSS parser with the text being parse and the position set to 0
+    def __init__(self, s):
+        self.s = s
+        self.i = 0
 
-# print_tree(k.parse())
+    # Advance through the current whitespace characters
+    def whitespace(self):
+        while self.i < len(self.s) and self.s[self.i].isspace():
+            self.i += 1
+
+    # Advance through the current word
+    def word(self):
+        start = self.i
+        while self.i < len(self.s):
+            if self.s[self.i].isalnum() or self.s[self.i] in "#-.%":
+                self.i += 1
+            else:
+                break
+
+        if start == self.i:
+            raise Exception("Error when parsing word")
+
+        return self.s[start : self.i]
+
+    # Advance through the given literal
+    def literal(self, literal):
+        if not (self.i < len(self.s) and self.s[self.i] == literal):
+            raise Exception(f"Error when parsing literal {literal}")
+        self.i += 1
+
+    # Advance through the current property-value pair
+    def pair(self):
+        prop = self.word()
+        self.whitespace()
+        self.literal(":")
+        self.whitespace()
+        value = self.word()
+        return prop.lower(), value
+
+    # Advance the index unconditionally until you reach one of the chars
+    def ignore_until(self, chars):
+        while self.i < len(self.s):
+            if self.s[self.i] in chars:
+                return self.s[self.i]
+            else:
+                self.i += 1
+
+    # Advance through the current "style" attribute
+    def body(self):
+        pairs = {}
+        while self.i < len(self.s):
+            try:
+                prop, value = self.pair()
+                pairs[prop] = value
+                self.whitespace()
+                self.literal(";")
+                self.whitespace()
+            except Exception as e:
+                print("Error parsing body:", e)  # DEBUG
+
+                # Skip to the next set of properties if encounter parsing error
+                why = self.ignore_until([";"])
+                if why == ";":
+                    self.literal(";")
+                    self.whitespace()
+                else:
+                    break
+        return pairs 
+
+# Recursively add the style property-value attributes to the given node and its children
+def style(node):
+    node.style = {}
+
+    if isinstance(node, Element) and "style" in node.attributes:
+        pairs = CSSParser(node.attributes["style"]).body()
+        for property, value in pairs.items():
+            node.style[property] = value
+
+
+    for child in node.children:
+        style(child)

@@ -49,9 +49,11 @@ class DrawRect:
     # Draws rectangle to the given canvas
     def execute(self, scroll, canvas: tkinter.Canvas):
         canvas.create_rectangle(
-            self.left, self.top - scroll,
-            self.right, self.bottom - scroll,
-            width=0,            # border width
+            self.left,
+            self.top - scroll,
+            self.right,
+            self.bottom - scroll,
+            width=0,  # border width
             fill=self.color,
         )
 
@@ -106,14 +108,20 @@ class BlockLayout:
         self.display_list = []
 
     def paint(self, display_list):
-        if isinstance(self.node, Element) and self.node.tag == "pre":
+        bgcolor = self.node.style.get("background-color", "transparent")
+        if bgcolor != "transparent":
             x2, y2 = self.x + self.width, self.y + self.height
-            display_list.append(DrawRect(self.x, self.y, x2, y2, "gray"))
+            display_list.append(DrawRect(self.x, self.y, x2, y2, bgcolor))
+
+        # if isinstance(self.node, Element) and self.node.tag == "pre":
+        #     x2, y2 = self.x + self.width, self.y + self.height
+        #     display_list.append(DrawRect(self.x, self.y, x2, y2, "gray"))
 
         for child in self.children:
             child.paint(display_list)
 
         for x, y, word, font in self.display_list:
+            print(word)
             display_list.append(DrawText(x, y, word, font))
 
     """
