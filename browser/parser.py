@@ -8,6 +8,7 @@ class Text:
     def __repr__(self):
         return self.text
 
+
 class Element:
     def __init__(self, tag, attributes, parent):
         self.tag = tag
@@ -147,6 +148,7 @@ class HTMLParser:
 
         return self.unfinished.pop()
 
+
 def print_tree(node, indent=0):
     print(" " * indent, node, node.style, getattr(node, "attributes", ""))
     for child in node.children:
@@ -154,6 +156,7 @@ def print_tree(node, indent=0):
 
 
 # A parser class containing parsing functions to advance through the text
+# Note: all of the functions assume no leading whitespace and strip trailing whitespace
 class CSSParser:
     # Initialize the CSS parser with the text being parse and the position set to 0
     def __init__(self, s):
@@ -205,7 +208,7 @@ class CSSParser:
     # Advance through the current "style" attribute
     def body(self):
         pairs = {}
-        while self.i < len(self.s):
+        while self.i < len(self.s) and self.s[self.i] != "}":
             try:
                 prop, value = self.pair()
                 pairs[prop] = value
@@ -213,20 +216,77 @@ class CSSParser:
                 self.literal(";")
                 self.whitespace()
             except Exception as e:
-                print("Error parsing body:", e)  # DEBUG
+                print("Error parsing body:", self.s, e)  # DEBUG
 
                 # Skip to the next set of properties if encounter parsing error
-                why = self.ignore_until([";"])
+                why = self.ignore_until([";", "}"])
                 if why == ";":
                     self.literal(";")
                     self.whitespace()
                 else:
                     break
-        return pairs 
+        return pairs
+
+    # Advance through the current CSS selector (tag or descendant)
+    def selector(self):
+        out = TagSelector(self.word().lower())
+        self.whitespace()
+        if self.i < len(self.s) and self.s[self.i] != "{":
+            out = DescendantSelector(out, TagSelector(self.word().lower()))
+            self.whitespace()
+        return out
+
+    # Parse a CSS file
+    def parse(self):
+        rules = []
+        while self.i < len(self.s):
+            # Skip the whole rule if encounter parsing error
+            try:
+                self.whitespace()
+                selector = self.selector()
+                self.literal("{")
+                self.whitespace()
+                body = self.body()
+                self.literal("}")
+                rules.append((selector, body))
+            except Exception:
+                why = self.ignore_until(["}"])
+                if why == "}":
+                    self.literal("}")
+                    self.whitespace()
+                else:
+                    break
+        return rules
+
+
+INHERITED_PROPERTIES = {
+    "font-size": "16px",
+    "font-style": "normal",
+    "font-weight": "normal",
+    "color": "black",
+}
+
 
 # Recursively add the style property-value attributes to the given node and its children
-def style(node):
+# 1. Add inherited CSS properties from default and parent
+# 2. Add CSS properties from stylesheet files
+# 3. Add CSS properties for element-specific style attributes
+def style(node, rules):
     node.style = {}
+
+    # Add default font properties to the current node
+    # Note: this must come before specific rules in CSS files
+    for property, value in INHERITED_PROPERTIES.items():
+        if node.parent:
+            node.style[property] = node.parent.style[property]
+        else:
+            node.style[property] = value
+
+    for selector, body in rules:
+        if not selector.matches(node):
+            continue
+        for property, value in body.items():
+            node.style[property] = value
 
     if isinstance(node, Element) and "style" in node.attributes:
         pairs = CSSParser(node.attributes["style"]).body()
@@ -234,5 +294,51 @@ def style(node):
             node.style[property] = value
 
 
+    # Resolve font percentage sign
+    if node.style["font-size"].endswith("%"):
+        if node.parent:
+            parent_font_size = node.parent.style["font-size"]
+        else:
+            parent_font_size = INHERITED_PROPERTIES["font-size"]
+
+        node_pct = float(node.style["font-size"][:-1]) / 100
+        parent_px = float(parent_font_size[:-2])
+        node.style["font-size"] = str(parent_px * node_pct) + "px"
+
     for child in node.children:
-        style(child)
+        style(child, rules)
+
+
+# Represents a CSS tag selector,
+class TagSelector:
+    def __init__(self, tag):
+        self.tag = tag
+        self.priority = 1
+
+    def matches(self, node):
+        return isinstance(node, Element) and self.tag == node.tag
+
+
+class DescendantSelector:
+    def __init__(self, ancestor, descendant):
+        self.ancestor = ancestor
+        self.descendant = descendant
+        self.priority = self.ancestor.priority + self.descendant.priority
+
+    def matches(self, node):
+        if not self.descendant.matches(node):
+            return False
+
+        while node.parent:
+            if self.ancestor.matches(node.parent):
+                return True
+            node = node.parent
+
+        return False
+
+
+# Returns the priority of the given CSS rule.
+# Higher priority should override lower priority.
+def cascade_priority(rule):
+    selector, body = rule
+    return selector.priority

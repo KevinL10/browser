@@ -1,7 +1,8 @@
-from browser.parser import HTMLParser, style
-from browser.request import request
+from browser.parser import HTMLParser, CSSParser, style, Element, cascade_priority
+from browser.request import URL
 from browser.constants import VSTEP, HEIGHT, WIDTH, SCROLL_STEP
 from browser.layout import DocumentLayout
+from browser.utils import tree_to_list
 import tkinter
 import tkinter.font
 
@@ -21,6 +22,10 @@ class Browser:
         # Linux mouse wheel bindings
         self.window.bind("<Button-4>", self.scrollup)
         self.window.bind("<Button-5>", self.scrolldown)
+
+        with open("tests/browser.css", "r") as f:
+            self.default_style_sheet = CSSParser(f.read()).parse()
+
 
     def scrollup(self, e):
         self.scroll = max(0, self.scroll - SCROLL_STEP)
@@ -47,9 +52,29 @@ class Browser:
 
     # Renders the contents of the url to the canvas
     def load(self, url):
-        headers, body = request(url)
+        url = URL(url)
+        headers, body = url.request()
         self.node = HTMLParser(body).parse()
-        style(self.node)
+
+        links = [
+            node.attributes["href"]
+            for node in tree_to_list(self.node, [])
+            if isinstance(node, Element)
+            and node.tag == "link"
+            and node.attributes.get("rel") == "stylesheet"
+            and "href" in node.attributes
+        ]
+
+        rules = self.default_style_sheet.copy()
+        
+        for link in links:
+            head, body = url.resolve(link).request()
+            rules.extend(CSSParser(body).parse())
+
+
+        # Sort first by CSS priority, then by file order
+        # Higher priority rules will come later in the rules array
+        style(self.node, sorted(rules, key=cascade_priority))
 
         self.document = DocumentLayout(self.node)
         self.document.layout()
