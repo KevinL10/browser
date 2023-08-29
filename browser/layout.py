@@ -58,6 +58,40 @@ class DrawRect:
             fill=self.color,
         )
 
+class DrawLine:
+    def __init__(self, x1, y1, x2, y2, color, thickness):
+        self.top = y1
+        self.left = x1
+        self.bottom = y2
+        self.right = x2
+        self.color = color
+        self.thickness = thickness
+
+    def execute(self, scroll, canvas):
+        canvas.create_line(
+            self.left, self.top - scroll,
+            self.right, self.bottom - scroll,
+            fill=self.color, width=self.thickness,
+        )
+
+class DrawOutline:
+    def __init__(self, x1, y1, x2, y2, color, thickness):
+        self.top = y1
+        self.left = x1
+        self.bottom = y2
+        self.right = x2
+        self.color = color
+        self.thickness = thickness
+
+    def execute(self, scroll, canvas):
+        canvas.create_rectangle(
+            self.left, self.top - scroll,
+            self.right, self.bottom - scroll,
+            width=self.thickness,
+            outline=self.color,
+        )
+
+
 
 # Represents the layout of a block element
 class BlockLayout:

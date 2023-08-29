@@ -143,4 +143,9 @@ class URL:
         return URL(self.scheme + "://" + self.host + ":" + str(self.port) + url)
 
     def __repr__(self):
-        return self.scheme + "://" + self.host + ":" + str(self.port) + self.path
+        port_part = ":" + str(self.port)
+        if self.scheme == "https" and self.port == 443:
+            port_part = ""
+        elif self.scheme == "http" and self.port == 80:
+            port_part = ""
+        return self.scheme + "://" + self.host + port_part + self.path
