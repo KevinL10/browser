@@ -9,7 +9,6 @@ from browser.parser import (
 from browser.constants import VSTEP, HEIGHT, WIDTH, SCROLL_STEP
 from browser.layout import (
     DocumentLayout,
-    print_layout,
     DrawRect,
     DrawLine,
     DrawText,
@@ -108,7 +107,7 @@ class Tab:
         self.document = DocumentLayout(self.node)
         self.document.layout()
 
-        print_layout(self.document)
+        # print_layout(self.document)
 
         # The display_list consists of commands like DrawText and DrawRect
         self.display_list = []

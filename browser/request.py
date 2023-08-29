@@ -120,8 +120,11 @@ class URL:
         # For view-source schemes, we show the raw HTML output
         # by replacing reserved characters with entities
         if self.url.startswith("view-source:"):
-            for reserved, entity in ENTITIES.items():
-                body = body.replace(reserved, entity)
+            for entity, character in ENTITIES.items():
+                body = body.replace(character, entity)
+        else:
+            for entity, character in ENTITIES.items():
+                body = body.replace(entity, character)
 
         return headers, body
 

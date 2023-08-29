@@ -1,13 +1,51 @@
-pre {
-  background-color: gray;
-}
-
 h1 {
-  font-size: 300%;
+  font-size: 2em;
+  font-weight: bold;
 }
 
-a { color: blue; }
-i { font-style: italic; }
-b { font-weight: bold; }
-small { font-size: 90%; }
-big { font-size: 110%; }
+h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 1.17em;
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 1.33em;
+  font-weight: bold;
+}
+
+h5 {
+  font-size: 0.83em;
+  font-weight: bold;
+}
+
+h6 {
+  font-size: 0.67em;
+  font-weight: bold;
+}
+
+a {
+  color: blue;
+}
+
+i {
+  font-style: italic;
+}
+
+b {
+  font-weight: bold;
+}
+
+small {
+  font-size: 90%;
+}
+
+big {
+  font-size: 110%;
+}
+
+/* https://www.w3schools.com/cssref/css_default_values.php */

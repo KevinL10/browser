@@ -1,6 +1,11 @@
 ENTITIES = {
-    "<": "&lt;",
-    ">": "&gt;"
+    "&lt;": "<",
+    "&gt;": ">",
+    "&ldquo;": '"',
+    "&rdquo;": '"',
+    "&lsquo;": "'",
+    "&rsquo;": "'",
+    "&copy;": "©",
 }
 
 # Canvas width and height
@@ -17,4 +22,3 @@ SCROLL_STEP = 100
 
 # Maximum number of redirects before erroring
 MAX_REDIRECTS = 5
-
