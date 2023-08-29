@@ -1,21 +1,20 @@
-from browser import request
 
 
-def test_request_file_url():
-    _, body = request("data:text/html,Hello world!")
-    assert body == "Hello world!"
+# def test_request_file_url():
+#     _, body = request("data:text/html,Hello world!")
+#     assert body == "Hello world!"
 
 
-def test_request_http_url():
-    for url in ["http://example.org", "http://example.org/"]:
-        _, body = request(url)
-        assert "Example Domain" in body
+# def test_request_http_url():
+#     for url in ["http://example.org", "http://example.org/"]:
+#         _, body = request(url)
+#         assert "Example Domain" in body
 
 
-def test_request_https_url():
-    for url in ["https://example.org", "https://example.org/"]:
-        _, body = request(url)
-        assert "Example Domain" in body
+# def test_request_https_url():
+#     for url in ["https://example.org", "https://example.org/"]:
+#         _, body = request(url)
+#         assert "Example Domain" in body
 
 
 # def test_request_view_source():

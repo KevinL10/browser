@@ -108,21 +108,20 @@ class BlockLayout:
         self.children = []
         self.display_list = []
 
+    def __repr__(self):
+        if isinstance(self.node, Text):
+            return "<BlockLayout text>"
+        else:
+            return f"<BlockLayout tag={self.node.tag}>"
+
     def paint(self, display_list):
         bgcolor = self.node.style.get("background-color", "transparent")
         if bgcolor != "transparent":
             x2, y2 = self.x + self.width, self.y + self.height
             display_list.append(DrawRect(self.x, self.y, x2, y2, bgcolor))
 
-        # if isinstance(self.node, Element) and self.node.tag == "pre":
-        #     x2, y2 = self.x + self.width, self.y + self.height
-        #     display_list.append(DrawRect(self.x, self.y, x2, y2, "gray"))
-
         for child in self.children:
             child.paint(display_list)
-
-        for x, y, word, font, color in self.display_list:
-            display_list.append(DrawText(x, y, word, font, color))
 
     """
     Returns the type of layout of the given HTML nodes
@@ -165,31 +164,17 @@ class BlockLayout:
                 self.children.append(next)
                 previous = next
         else:
-            self.display_list = []
-            self.cursor_x = 0
-            self.cursor_y = 0
-            self.weight = "normal"
-            self.style = "roman"
-            self.size = 16
-
-            # A list of (x, word, font) tuples representing the current line
-            # The final display_list is computed by aligning the words along the
-            # bottom of the line
-            self.line = []
-
+            self.new_line()
             self.recurse(self.node)
-
-            # Flushy any remaining layout elements
-            self.flush()
 
         # Recursively layout each block child
         for child in self.children:
             child.layout()
 
-        if mode == "block":
-            self.height = sum([child.height for child in self.children])
-        else:
-            self.height = self.cursor_y
+        # If block-mode, then the height is the sum of its children HTML elements
+        # Otherwise, if inline-mode, then the height is the sum of the children
+        # LineLayout objects
+        self.height = sum([child.height for child in self.children])
 
     """
     Recursively layout the parsed HTML tree
@@ -201,21 +186,34 @@ class BlockLayout:
                 self.word(node, word)
         else:
             if node.tag == "br":
-                self.flush()
+                self.new_line()
 
             for child in node.children:
                 self.recurse(child)
 
     # Add the word in the current node to the display list
     def word(self, node, word):
-        color = node.style["color"]
         font = self.get_font(node)
-        # font = get_font(self.size, self.weight, self.style)
         w = font.measure(word)
+
         if self.cursor_x + w > self.width:
-            self.flush()
-        self.line.append((self.cursor_x, word, font, color))
+            self.new_line()
+
+        # Add the word to the current LineLayout object
+        line = self.children[-1]
+        text = TextLayout(node, word, line, self.previous_word)
+        line.children.append(text)
+        self.previous_word = text
+
         self.cursor_x += w + font.measure(" ")
+
+    # Creates a new line object
+    def new_line(self):
+        self.previous_word = None
+        self.cursor_x = 0
+
+        previous_line = self.children[-1] if self.children else None
+        self.children.append(LineLayout(self.node, self, previous_line))
 
     # Return the font corresponding to the current node's style attributes
     def get_font(self, node):
@@ -229,28 +227,89 @@ class BlockLayout:
 
         return get_font(font_size, weight, style)
 
-    # Flushes the current display line:
-    # - Aligns the word along the bottom of the line
-    # - Add all of the words in the current line to the display_list
-    # - Updates cursor_x and cursor_y
-    def flush(self):
-        if not self.line:
+
+# Stores the layout for a line of words
+class LineLayout:
+    def __init__(self, node, parent, previous):
+        self.node = node
+        self.parent = parent
+        self.previous = previous
+        self.children = []
+
+    def __repr__(self):
+        return "<LineLayout>"
+
+    def layout(self):
+        self.width = self.parent.width
+        self.x = self.parent.x
+
+        if self.previous:
+            self.y = self.previous.y + self.previous.height
+        else:
+            self.y = self.parent.y
+
+        # Layout each of the words (TextLayout objects) in the current line
+        for word in self.children:
+            word.layout()
+
+        # TODO: how should you handle the case of multiple <br> tags in a row?
+        if not self.children:
+            self.height = 0
             return
 
-        metrics = [font.metrics() for x, word, font, color in self.line]
+        metrics = [word.font.metrics() for word in self.children]
         max_ascent = max([metric["ascent"] for metric in metrics])
         max_descent = max([metric["descent"] for metric in metrics])
-        baseline = self.cursor_y + 1.25 * max_ascent
+        baseline = self.y + 1.25 * max_ascent
 
-        for rel_x, word, font, color in self.line:
-            x = self.x + rel_x
-            y = self.y + baseline - font.metrics("ascent")
-            self.display_list.append((x, y, word, font, color))
+        for word in self.children:
+            word.y = baseline - word.font.metrics("ascent")
 
-        self.cursor_y = baseline + 1.25 * max_descent
-        self.cursor_x = 0
+        self.height = 1.25 * (max_ascent + max_descent)
 
-        self.line = []
+    # Paints all of the children TextLayout objects
+    def paint(self, display_list):
+        for child in self.children:
+            child.paint(display_list)
+
+
+# Stores the layout for a single word
+class TextLayout:
+    def __init__(self, node, word, parent, previous):
+        self.node = node
+        self.word = word
+        self.parent = parent
+        self.previous = previous
+        self.children = []
+
+    def __repr__(self):
+        return f'<TextLayout word="{self.word}">'
+
+    # Layout the current text object by computing its font, x, width, and height
+    # Note: the text's y coordinate is already computed by the LineLayout object
+    def layout(self):
+        # Set the font for the current word
+        weight = self.node.style["font-weight"]
+        style = self.node.style["font-style"]
+        font_size = int(float(self.node.style["font-size"][:-2]) * 0.75)
+        if style == "normal":
+            style = "roman"
+        self.font = get_font(font_size, weight, style)
+
+        # Compute the position and dimensions of the word
+        self.width = self.font.measure(self.word)
+
+        if self.previous:
+            self.x = self.previous.x + self.previous.width + self.font.measure(" ")
+        else:
+            self.x = self.parent.x
+
+        self.height = self.font.metrics("linespace")
+
+    # Paints the current word to the display list
+    def paint(self, display_list):
+        color = self.node.style["color"]
+        display_list.append(DrawText(self.x, self.y, self.word, self.font, color))
 
 
 class DocumentLayout:
@@ -270,3 +329,9 @@ class DocumentLayout:
         self.width = WIDTH - 2 * HSTEP
         child.layout()
         self.height = child.height + 2 * VSTEP
+
+
+def print_layout(node, indent=0):
+    print(" " * indent, node)
+    for child in node.children:
+        print_layout(child, indent + 2)

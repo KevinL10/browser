@@ -85,7 +85,7 @@ class URL:
 
         # Handle redirects
         if 300 <= int(status) <= 399:
-            return self.request(headers["location"], num_redirects + 1)
+            return URL(headers["location"]).request(num_redirects + 1)
 
         assert status == b"200", f"{status}: {explanation}"
         body = response.read()

@@ -2,10 +2,6 @@ pre {
   background-color: gray;
 }
 
-h1 {
-  font-size: 300%;
-}
-
 a { color: blue; }
 i { font-style: italic; }
 b { font-weight: bold; }
