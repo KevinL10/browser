@@ -9,11 +9,11 @@ Adapted from [browser.engineering](https://browser.engineering/).
 ### Todo:
 
 - [] Fix comment handling in HTML and CSS parser
-- [] <pre> and <code>
+- [] `<pre>` and `<code>`
 - [] Browser resizing
 - [] Visual scroll bar
-- [] Bullet lists <li>
-- [] Inline CSS styling <style>
+- [] Bullet lists `<li>`
+- [] Inline CSS styling `<style>`
 - [] Additional CSS selectors
 - [] Move block/inline display to the default CSS file
 - [] Class selectors for CSS
