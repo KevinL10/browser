@@ -58,6 +58,7 @@ class DrawRect:
             fill=self.color,
         )
 
+
 class DrawLine:
     def __init__(self, x1, y1, x2, y2, color, thickness):
         self.top = y1
@@ -69,10 +70,14 @@ class DrawLine:
 
     def execute(self, scroll, canvas):
         canvas.create_line(
-            self.left, self.top - scroll,
-            self.right, self.bottom - scroll,
-            fill=self.color, width=self.thickness,
+            self.left,
+            self.top - scroll,
+            self.right,
+            self.bottom - scroll,
+            fill=self.color,
+            width=self.thickness,
         )
+
 
 class DrawOutline:
     def __init__(self, x1, y1, x2, y2, color, thickness):
@@ -85,12 +90,13 @@ class DrawOutline:
 
     def execute(self, scroll, canvas):
         canvas.create_rectangle(
-            self.left, self.top - scroll,
-            self.right, self.bottom - scroll,
+            self.left,
+            self.top - scroll,
+            self.right,
+            self.bottom - scroll,
             width=self.thickness,
             outline=self.color,
         )
-
 
 
 # Represents the layout of a block element
@@ -194,6 +200,10 @@ class BlockLayout:
             previous = None
             # Create a BlockLayout for every child in the HTML tree of the current node
             for child in self.node.children:
+                # Don't add the <head> tag to the layout tree
+                if isinstance(child, Element) and child.tag == "head":
+                    continue
+
                 next = BlockLayout(child, self, previous)
                 self.children.append(next)
                 previous = next
@@ -322,12 +332,14 @@ class TextLayout:
     # Layout the current text object by computing its font, x, width, and height
     # Note: the text's y coordinate is already computed by the LineLayout object
     def layout(self):
-        # Set the font for the current word
         weight = self.node.style["font-weight"]
         style = self.node.style["font-style"]
         font_size = int(float(self.node.style["font-size"][:-2]) * 0.75)
+
+        # Convert to tkinter
         if style == "normal":
             style = "roman"
+
         self.font = get_font(font_size, weight, style)
 
         # Compute the position and dimensions of the word

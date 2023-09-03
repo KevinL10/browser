@@ -150,7 +150,7 @@ class HTMLParser:
 
 
 def print_tree(node, indent=0):
-    print(" " * indent, node, node.style, getattr(node, "attributes", ""))
+    print(" " * indent, node)
     for child in node.children:
         print_tree(child, indent + 2)
 
@@ -293,20 +293,27 @@ def style(node, rules):
         for property, value in pairs.items():
             node.style[property] = value
 
-    # print(rules)
     # Resolve font sizes
-    parent_px = (
-        float(node.parent.style["font-size"][:-2])
+    parent_font_size = (
+        node.parent.style["font-size"]
         if node.parent
         else INHERITED_PROPERTIES["font-size"]
     )
 
+    parent_px = float(parent_font_size[:-2])
+
     if node.style["font-size"].endswith("%"):
         node_pct = float(node.style["font-size"][:-1]) / 100
         node.style["font-size"] = str(parent_px * node_pct) + "px"
+    # TODO: handle rem and em separately
     elif node.style["font-size"].endswith("em"):
         node_em = float(node.style["font-size"][:-2])
         node.style["font-size"] = str(node_em * parent_px) + "px"
+
+    # TODO: do we need to support floats?
+    if node.style["font-weight"].isnumeric():
+        weight = int(node.style["font-weight"])
+        node.style["font-weight"] = "normal" if weight < (400 + 700) / 2 else "bold"
 
     for child in node.children:
         style(child, rules)
@@ -320,6 +327,9 @@ class TagSelector:
 
     def matches(self, node):
         return isinstance(node, Element) and self.tag == node.tag
+
+    def __repr__(self):
+        return f"<TagSelector {self.tag}>"
 
 
 class DescendantSelector:
@@ -338,6 +348,9 @@ class DescendantSelector:
             node = node.parent
 
         return False
+
+    def __repr__(self):
+        return f"<TagSelector {self.ancestor} {self.descendant}>"
 
 
 # Returns the priority of the given CSS rule.

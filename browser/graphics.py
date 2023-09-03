@@ -14,6 +14,7 @@ from browser.layout import (
     DrawText,
     DrawOutline,
     get_font,
+    print_layout
 )
 from browser.utils import tree_to_list
 from browser.request import URL
@@ -95,7 +96,7 @@ class Tab:
         ]
 
         rules = self.default_style_sheet.copy()
-
+    
         for link in links:
             head, body = url.resolve(link).request()
             rules.extend(CSSParser(body).parse())
@@ -107,7 +108,8 @@ class Tab:
         self.document = DocumentLayout(self.node)
         self.document.layout()
 
-        # print_layout(self.document)
+        # print_tree(self.node)
+        print_layout(self.document)
 
         # The display_list consists of commands like DrawText and DrawRect
         self.display_list = []
@@ -140,7 +142,6 @@ class Browser:
 
         self.window.bind("<Key>", self.handle_key)
         self.window.bind("<Return>", self.handle_enter)
-
 
         self.tabs = []
         self.active_tab = None

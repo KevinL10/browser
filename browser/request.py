@@ -56,7 +56,7 @@ class URL:
             type=socket.SOCK_STREAM,
             proto=socket.IPPROTO_TCP,
         )
-
+        print(self.host)
         s.connect((self.host, self.port))
 
         if self.scheme == "https":
